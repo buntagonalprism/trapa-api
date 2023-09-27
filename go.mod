@@ -1,4 +1,4 @@
-module trapa/api
+module github.com/buntagonalprism/trapa/api
 
 go 1.20
 
