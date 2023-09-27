@@ -4,7 +4,6 @@ import (
 	"log"
 
 	"cloud.google.com/go/firestore"
-	fbAuth "firebase.google.com/go/v4/auth"
 	"github.com/buntagonalprism/trapa/api/common"
 	"github.com/gin-gonic/gin"
 )
@@ -40,7 +39,7 @@ type tripService struct {
 
 func (s *tripService) CreateTrip(ctx *gin.Context, req CreateTripRequest) (*Trip, error) {
 	newDoc := s.fs.Collection("trips").NewDoc()
-	userId := ctx.MustGet(common.FirebaseUserKey).(*fbAuth.Token).UID
+	userId := ctx.MustGet(common.FirebaseUserIdKey).(string)
 	trip := &Trip{
 		Name:          req.Name,
 		StartDate:     req.StartDate,

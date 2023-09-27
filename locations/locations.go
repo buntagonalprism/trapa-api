@@ -1,12 +1,16 @@
 package locations
 
+import (
+	"github.com/buntagonalprism/trapa/api/common"
+)
+
 type LocationsService interface {
-	SearchPlaces(query string, session LocationSearchSession) ([]Place, LocationSearchSession, error)
-	GetPlaceDetails(placeId string, session LocationSearchSession) (PlaceDetails, error)
+	SearchPlaces(userId string, query string) ([]Place, error)
+	GetPlaceDetails(userId string, placeId string) (PlaceDetails, error)
 }
 
-func NewLocationsService() LocationsService {
-	return &locationsService{}
+func NewLocationsService(cache common.Cache) LocationsService {
+	return &locationsService{cache: cache}
 }
 
 type Place struct {
@@ -15,11 +19,6 @@ type Place struct {
 	CountryCode string `json:"countryCode"`
 	Coordinates `json:"coordinates"`
 }
-
-type LocationSearchSession struct {
-	sessionKey string
-}
-
 type PlaceDetails struct {
 	Place   `json:"place"`
 	Website string `json:"website"`
@@ -31,12 +30,20 @@ type Coordinates struct {
 }
 
 type locationsService struct {
+	cache common.Cache
 }
 
-func (s *locationsService) SearchPlaces(query string, session LocationSearchSession) ([]Place, LocationSearchSession, error) {
-	return nil, LocationSearchSession{}, nil
+func (s *locationsService) SearchPlaces(userId string, query string) ([]Place, error) {
+	sessionKey, _ := s.cache.Get(userSessionCacheKey(userId))
+	print(sessionKey)
+	return nil, nil
 }
 
-func (s *locationsService) GetPlaceDetails(placeId string, session LocationSearchSession) (PlaceDetails, error) {
+func (s *locationsService) GetPlaceDetails(userId string, placeId string) (PlaceDetails, error) {
+	s.cache.Delete(userSessionCacheKey(userId))
 	return PlaceDetails{}, nil
+}
+
+func userSessionCacheKey(userId string) string {
+	return "userSessionKey_" + userId
 }

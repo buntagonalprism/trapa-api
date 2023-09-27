@@ -43,10 +43,12 @@ func main() {
 	router.Use(common.CORSMiddleware())
 	router.Use(common.FirebaseAuth(authClient))
 
-	v1 := router.Group("/v1")
-	locationRouter := locations.NewLocationRouter(locations.NewLocationsService())
-	locationRouter.RegisterRoutes(v1)
+	cache := common.NewCache()
+	locationRouter := locations.NewLocationRouter(locations.NewLocationsService(cache))
 	tripRouter := trips.NewTripRouter(trips.NewTripService())
+
+	v1 := router.Group("/v1")
+	locationRouter.RegisterRoutes(v1)
 	tripRouter.RegisterRoutes(v1)
 	router.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{

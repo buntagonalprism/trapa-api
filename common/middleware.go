@@ -42,6 +42,7 @@ func FirebaseAuth(authClient *auth.Client) gin.HandlerFunc {
 			return
 		}
 		c.Set(FirebaseUserKey, token)
+		c.Set(FirebaseUserIdKey, token.UID)
 	}
 }
 
@@ -59,3 +60,4 @@ func extractBearerToken(header string) (string, error) {
 }
 
 const FirebaseUserKey = "firebase_user"
+const FirebaseUserIdKey = "firebase_user_id"

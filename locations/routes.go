@@ -1,6 +1,9 @@
 package locations
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/buntagonalprism/trapa/api/common"
+	"github.com/gin-gonic/gin"
+)
 
 type LocationRouter struct {
 	locationsService LocationsService
@@ -18,14 +21,14 @@ func (r *LocationRouter) RegisterRoutes(router *gin.RouterGroup) {
 
 func (r *LocationRouter) searchPlacesHandler(c *gin.Context) {
 	query := c.Query("query")
-	session := LocationSearchSession{sessionKey: c.Query("sessionKey")}
-	places, _, _ := r.locationsService.SearchPlaces(query, session)
+	userId := c.MustGet(common.FirebaseUserIdKey).(string)
+	places, _ := r.locationsService.SearchPlaces(userId, query)
 	print(places)
 }
 
 func (r *LocationRouter) getPlaceDetailsHandler(c *gin.Context) {
 	placeId := c.Param("placeId")
-	session := LocationSearchSession{sessionKey: c.Query("sessionKey")}
-	details, _ := r.locationsService.GetPlaceDetails(placeId, session)
+	userId := c.MustGet(common.FirebaseUserIdKey).(string)
+	details, _ := r.locationsService.GetPlaceDetails(userId, placeId)
 	print(details.Name)
 }
