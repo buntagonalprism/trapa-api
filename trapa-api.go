@@ -40,6 +40,7 @@ func main() {
 	defer fs.Close()
 
 	router := gin.Default()
+	router.Use(CORSMiddleware())
 	router.Use(FirebaseAuth())
 
 	v1 := router.Group("/v1")
@@ -56,33 +57,53 @@ func main() {
 }
 
 func createTripHandler(c *gin.Context) {
-	var trip Trip
-	if err := c.ShouldBindJSON(&trip); err != nil {
+	var req CreateTripRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"errors": getFieldDisplayErrors(err)})
 		return
 	}
 
-	tripId, err := addTrip(c, trip)
+	trip, err := addTrip(c, req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(200, gin.H{
-		"trip_id": tripId,
-	})
+	c.JSON(200, trip)
 }
 
-func addTrip(ctx *gin.Context, trip Trip) (string, error) {
+func addTrip(ctx *gin.Context, req CreateTripRequest) (*Trip, error) {
 	newDoc := fs.Collection("trips").NewDoc()
-	trip.Owner = ctx.MustGet(FirebaseUserKey).(*fbAuth.Token).UID
+	trip := &Trip{
+		Name:          req.Name,
+		StartDate:     req.StartDate,
+		EndDate:       req.EndDate,
+		SingleCountry: req.SingleCountryCode,
+		Owner:         ctx.MustGet(FirebaseUserKey).(*fbAuth.Token).UID,
+		Editors:       []string{ctx.MustGet(FirebaseUserKey).(*fbAuth.Token).UID},
+	}
 	_, err := newDoc.Set(ctx, trip)
 	if err != nil {
 		// Handle any errors in an appropriate way, such as returning them.
 		log.Printf("An error has occurred: %s", err)
 	}
+	trip.Id = newDoc.ID
+	return trip, err
+}
 
-	return newDoc.ID, err
+func CORSMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE")
+
+		// Respond with no content to OPTIONS preflight requests from browsers
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
+		c.Next()
+	}
 }
 
 func FirebaseAuth() gin.HandlerFunc {

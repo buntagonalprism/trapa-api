@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -25,21 +26,31 @@ type FieldDisplayError struct {
 }
 
 func getFieldDisplayErrors(err error) []FieldDisplayError {
-	validationErrors := err.(validator.ValidationErrors)
-	displayErrors := make([]FieldDisplayError, len(validationErrors))
-	for i, fieldError := range validationErrors {
-		var displayMsg string
-		if msg, ok := validationErrorMessages[fieldError.Tag()]; ok {
-			displayMsg = fmt.Sprintf(msg, fieldError.Field())
-		} else {
-			displayMsg = fmt.Sprintf("Field %s failed validation %s", fieldError.Error(), fieldError.Field())
+	if validationErrors, ok := err.(validator.ValidationErrors); ok {
+		displayErrors := make([]FieldDisplayError, len(validationErrors))
+		for i, fieldError := range validationErrors {
+			var displayMsg string
+			if msg, ok := validationErrorMessages[fieldError.Tag()]; ok {
+				displayMsg = fmt.Sprintf(msg, fieldError.Field())
+			} else {
+				displayMsg = fmt.Sprintf("Field %s failed validation %s", fieldError.Error(), fieldError.Field())
+			}
+			displayErrors[i] = FieldDisplayError{
+				Field: fieldError.Field(),
+				Error: displayMsg,
+			}
 		}
-		displayErrors[i] = FieldDisplayError{
-			Field: fieldError.Field(),
-			Error: displayMsg,
-		}
+		return displayErrors
 	}
-	return displayErrors
+	if unmarshalError, ok := err.(*json.UnmarshalTypeError); ok {
+		displayErrors := make([]FieldDisplayError, 1)
+		displayErrors[0] = FieldDisplayError{
+			Field: unmarshalError.Field,
+			Error: fmt.Sprintf("Field %s must be of type %s, but recieved %s", unmarshalError.Field, unmarshalError.Type.String(), unmarshalError.Value),
+		}
+		return displayErrors
+	}
+	panic("Unknown error type")
 }
 
 var validationErrorMessages = map[string]string{
