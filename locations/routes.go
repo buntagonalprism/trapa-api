@@ -1,7 +1,6 @@
 package locations
 
 import (
-	"github.com/buntagonalprism/trapa/api/common"
 	"github.com/gin-gonic/gin"
 )
 
@@ -21,14 +20,29 @@ func (r *LocationRouter) RegisterRoutes(router *gin.RouterGroup) {
 
 func (r *LocationRouter) searchPlacesHandler(c *gin.Context) {
 	query := c.Query("query")
-	userId := c.MustGet(common.FirebaseUserIdKey).(string)
-	places, _ := r.locationsService.SearchPlaces(userId, query)
-	print(places)
+	if query == "" {
+		c.JSON(400, gin.H{"error": "query parameter is required"})
+		return
+	}
+	country := c.Query("country")
+	if country == "" {
+		c.JSON(400, gin.H{"error": "country parameter is required"})
+		return
+	}
+	places, err := r.locationsService.SearchPlaces(c, query, country)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(200, places)
 }
 
 func (r *LocationRouter) getPlaceDetailsHandler(c *gin.Context) {
 	placeId := c.Param("placeId")
-	userId := c.MustGet(common.FirebaseUserIdKey).(string)
-	details, _ := r.locationsService.GetPlaceDetails(userId, placeId)
-	print(details.Name)
+	if placeId == "" {
+		c.JSON(400, gin.H{"error": "placeId parameter is required"})
+		return
+	}
+	details, _ := r.locationsService.GetPlaceDetails(c, placeId)
+	c.JSON(200, details)
 }

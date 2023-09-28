@@ -12,6 +12,7 @@
             "program": "${workspaceFolder}",
             "env": {
                 "GOOGLE_APPLICATION_CREDENTIALS": "${workspaceFolder}/secrets/trapa-dev-firebase-adminsdk.json",
+                "GOOGLE_MAPS_API_KEY_FILE": "${workspaceFolder}/secrets/google-maps-api-key.txt",
             },
         },
         {

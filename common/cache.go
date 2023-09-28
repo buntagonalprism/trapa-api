@@ -11,7 +11,9 @@ type cache struct {
 }
 
 func NewCache() Cache {
-	return &cache{}
+	return &cache{
+		data: make(map[string]interface{}),
+	}
 }
 
 func (c *cache) Set(key string, value interface{}) error {
