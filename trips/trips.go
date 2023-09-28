@@ -9,20 +9,18 @@ import (
 )
 
 type Trip struct {
-	Id            string   `json:"id"               firestore:"-"`
-	Name          string   `json:"name"             firestore:"name"`
-	StartDate     string   `json:"startDate"        firestore:"startDate"`
-	EndDate       string   `json:"endDate"          firestore:"endDate"`
-	SingleCountry string   `json:"singleCountry"    firestore:"singleCountry,omitempty"`
-	Owner         string   `json:"owner"            firestore:"owner"`
-	Editors       []string `json:"editors"          firestore:"editors"`
+	Id        string   `json:"id"               firestore:"-"`
+	Name      string   `json:"name"             firestore:"name"`
+	StartDate string   `json:"startDate"        firestore:"startDate"`
+	EndDate   string   `json:"endDate"          firestore:"endDate"`
+	Owner     string   `json:"owner"            firestore:"owner"`
+	Editors   []string `json:"editors"          firestore:"editors"`
 }
 
 type CreateTripRequest struct {
-	Name              string `json:"name"               binding:"required"`
-	StartDate         string `json:"startDate"          binding:"required,date"`
-	EndDate           string `json:"endDate"            binding:"required,date"`
-	SingleCountryCode string `json:"singleCountryCode"`
+	Name      string `json:"name"               binding:"required"`
+	StartDate string `json:"startDate"          binding:"required,date"`
+	EndDate   string `json:"endDate"            binding:"required,date"`
 }
 
 type TripService interface {
@@ -41,12 +39,11 @@ func (s *tripService) CreateTrip(ctx *gin.Context, req CreateTripRequest) (*Trip
 	newDoc := s.fs.Collection("trips").NewDoc()
 	userId := ctx.MustGet(common.FirebaseUserIdKey).(string)
 	trip := &Trip{
-		Name:          req.Name,
-		StartDate:     req.StartDate,
-		EndDate:       req.EndDate,
-		SingleCountry: req.SingleCountryCode,
-		Owner:         userId,
-		Editors:       []string{userId},
+		Name:      req.Name,
+		StartDate: req.StartDate,
+		EndDate:   req.EndDate,
+		Owner:     userId,
+		Editors:   []string{userId},
 	}
 	_, err := newDoc.Set(ctx, trip)
 	if err != nil {

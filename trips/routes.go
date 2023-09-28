@@ -3,6 +3,7 @@ package trips
 import (
 	"net/http"
 
+	"github.com/buntagonalprism/trapa/api/common"
 	"github.com/gin-gonic/gin"
 )
 
@@ -20,15 +21,15 @@ func (r *TripRouter) RegisterRoutes(router *gin.RouterGroup) {
 }
 
 func (r *TripRouter) createTripHandler(c *gin.Context) {
-	var req CreateTripRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"errors": getFieldDisplayErrors(err)})
+	req, err := common.BindJson[CreateTripRequest](c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, err)
 		return
 	}
 
-	trip, err := r.tripService.CreateTrip(c, req)
+	trip, err := r.tripService.CreateTrip(c, *req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, common.ErrorResponse{Message: err.Error()})
 		return
 	}
 
