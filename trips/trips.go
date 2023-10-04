@@ -27,8 +27,10 @@ type TripService interface {
 	CreateTrip(ctx *gin.Context, req CreateTripRequest) (*Trip, error)
 }
 
-func NewTripService() TripService {
-	return &tripService{}
+func NewTripService(fs *firestore.Client) TripService {
+	return &tripService{
+		fs: fs,
+	}
 }
 
 type tripService struct {

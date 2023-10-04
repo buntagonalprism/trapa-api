@@ -11,8 +11,8 @@
             "mode": "auto",
             "program": "${workspaceFolder}",
             "env": {
-                "GOOGLE_APPLICATION_CREDENTIALS": "${workspaceFolder}/secrets/trapa-dev-firebase-adminsdk.json",
-                "GOOGLE_MAPS_API_KEY_FILE": "${workspaceFolder}/secrets/google-maps-api-key.txt",
+                "GOOGLE_CLOUD_PROJECT": "trapa-dev",
+                "GOOGLE_CLOUD_PROJECT_NUMBER": "584032921839"
             },
         },
         {
@@ -23,7 +23,8 @@
             "mode": "auto",
             "program": "${workspaceFolder}",
             "env": {
-                "GOOGLE_APPLICATION_CREDENTIALS": "${workspaceFolder}/secrets/trapa-prod-firebase-adminsdk.json",
+                "GOOGLE_CLOUD_PROJECT": "trapa-prod",
+                "GOOGLE_CLOUD_PROJECT_NUMBER": "497813458106"
             },
             
         }

@@ -4,6 +4,7 @@ go 1.20
 
 require (
 	cloud.google.com/go/firestore v1.12.0
+	cloud.google.com/go/secretmanager v1.11.1
 	firebase.google.com/go/v4 v4.12.0
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-playground/validator/v10 v10.15.2

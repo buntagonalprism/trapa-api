@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 
@@ -27,7 +28,9 @@ func init() {
 		log.Fatalf("error initializing Firebase app: %v\n", err)
 	}
 
-	fsClient, err = fbApp.Firestore(context.Background())
+	ctx := context.Background()
+	projectName := os.Getenv("GOOGLE_CLOUD_PROJECT")
+	fsClient, err = firestore.NewClient(ctx, projectName)
 	if err != nil {
 		log.Fatalf("error initializing Firestore: %v\n", err)
 	}
@@ -37,9 +40,12 @@ func init() {
 		log.Fatalf("error initializing Firebase auth client: %v\n", err)
 	}
 
-	mapsKeyFilePath := os.Getenv("GOOGLE_MAPS_API_KEY_FILE")
-	mapsKeyData, _ := os.ReadFile(mapsKeyFilePath)
-	mapsKey := string(mapsKeyData)
+	mapsKeySecret := fmt.Sprintf("projects/%s/secrets/places-api-key/versions/latest", os.Getenv("GOOGLE_CLOUD_PROJECT_NUMBER"))
+	mapsKeyBytes, err := AccessSecretVersion(mapsKeySecret)
+	if err != nil {
+		log.Fatalf("error getting Google Places API key: %v\n", err)
+	}
+	mapsKey := string(mapsKeyBytes)
 	mapsClient, err = maps.NewClient(maps.WithAPIKey(mapsKey))
 	if err != nil {
 		log.Fatalf("error initializing Google Maps client: %v\n", err)
@@ -56,7 +62,7 @@ func main() {
 
 	cache := common.NewCache()
 	locationRouter := locations.NewLocationRouter(locations.NewLocationsService(cache, mapsClient))
-	tripRouter := trips.NewTripRouter(trips.NewTripService())
+	tripRouter := trips.NewTripRouter(trips.NewTripService(fsClient))
 
 	v1 := router.Group("/v1")
 	locationRouter.RegisterRoutes(v1)
