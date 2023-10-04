@@ -28,16 +28,14 @@ func init() {
 		log.Fatalf("error initializing Firebase app: %v\n", err)
 	}
 
-	ctx := context.Background()
-	projectName := os.Getenv("GOOGLE_CLOUD_PROJECT")
-	fsClient, err = firestore.NewClient(ctx, projectName)
-	if err != nil {
-		log.Fatalf("error initializing Firestore: %v\n", err)
-	}
-
 	authClient, err = fbApp.Auth(context.Background())
 	if err != nil {
 		log.Fatalf("error initializing Firebase auth client: %v\n", err)
+	}
+
+	fsClient, err = firestore.NewClient(context.Background(), os.Getenv("GOOGLE_CLOUD_PROJECT"))
+	if err != nil {
+		log.Fatalf("error initializing Firestore: %v\n", err)
 	}
 
 	mapsKeySecret := fmt.Sprintf("projects/%s/secrets/places-api-key/versions/latest", os.Getenv("GOOGLE_CLOUD_PROJECT_NUMBER"))
