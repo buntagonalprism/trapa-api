@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"runtime"
 
 	"cloud.google.com/go/firestore"
 	firebase "firebase.google.com/go/v4"
@@ -71,5 +72,11 @@ func main() {
 	locationRouter.RegisterRoutes(v1)
 	tripRouter.RegisterRoutes(v1)
 
-	router.Run("localhost:3000")
+	if runtime.GOOS == "windows" {
+		// For local windows development, to avoid needing to run as admin
+		router.Run("localhost:3000")
+	} else {
+		router.Run(":3000")
+	}
+
 }

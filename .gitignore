@@ -1,2 +1,2 @@
-secrets/
 *.exe
+compose.override.yaml

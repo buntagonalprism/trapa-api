@@ -1,0 +1,4 @@
+services:
+  trapa-api:
+    volumes:
+      - "/mnt/c/Users/<USERNAME>/AppData/Roaming/gcloud/application_default_credentials.json:/gcp/creds.json:ro"
