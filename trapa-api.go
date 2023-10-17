@@ -72,11 +72,12 @@ func main() {
 	locationRouter.RegisterRoutes(v1)
 	tripRouter.RegisterRoutes(v1)
 
+	port := os.Getenv("PORT")
 	if runtime.GOOS == "windows" {
 		// For local windows development, to avoid needing to run as admin
-		router.Run("localhost:3000")
+		router.Run("localhost:" + port)
 	} else {
-		router.Run(":3000")
+		router.Run(":" + port)
 	}
 
 }

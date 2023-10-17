@@ -7,5 +7,6 @@ services:
       - GOOGLE_APPLICATION_CREDENTIALS=/gcp/creds.json
       - GOOGLE_CLOUD_PROJECT=trapa-dev
       - GOOGLE_CLOUD_PROJECT_NUMBER=584032921839
+      - PORT=3000
     volumes:
       - "/mnt/c/Users/t/AppData/Roaming/gcloud/application_default_credentials.json:/gcp/creds.json:ro"

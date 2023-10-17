@@ -12,7 +12,8 @@
             "program": "${workspaceFolder}",
             "env": {
                 "GOOGLE_CLOUD_PROJECT": "trapa-dev",
-                "GOOGLE_CLOUD_PROJECT_NUMBER": "584032921839"
+                "GOOGLE_CLOUD_PROJECT_NUMBER": "584032921839",
+                "PORT": "3000"
             },
         },
         {
@@ -24,7 +25,8 @@
             "program": "${workspaceFolder}",
             "env": {
                 "GOOGLE_CLOUD_PROJECT": "trapa-prod",
-                "GOOGLE_CLOUD_PROJECT_NUMBER": "497813458106"
+                "GOOGLE_CLOUD_PROJECT_NUMBER": "497813458106",
+                "PORT": "3000"
             },
             
         }
