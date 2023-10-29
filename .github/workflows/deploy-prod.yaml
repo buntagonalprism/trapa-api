@@ -43,7 +43,7 @@ jobs:
           git tag -a $tagVersion -m "Version $tagVersion" ${{ github.sha }}
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
           git push origin $tagVersion
-          echo "version=${tagVersion$v}" >> "$GITHUB_OUTPUT"
+          echo "version=${tagVersion#v}" >> "$GITHUB_OUTPUT"
 
       - name: Google Auth
         id: auth
