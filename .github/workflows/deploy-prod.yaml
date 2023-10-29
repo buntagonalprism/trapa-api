@@ -36,17 +36,23 @@ jobs:
           branchName="${{ github.ref }}"
           initialReleaseVersion=v${branchName#refs/heads/release/v}.0
           if [ $(git tag -l "$initialReleaseVersion") ]; then
-              echo "Tagging commit with version ${{ steps.version.outputs.version_tag }}"
+              echo "Subsequent commit on release branch $branchName. Using automatic semantic version ${{ steps.version.outputs.version_tag }}"
               tagVersion=${{ steps.version.outputs.version_tag }}    
           else
-              echo "First commit on release branch $branchName. Tagging commit with version $initialReleaseVersion"
+              echo "First commit on release branch $branchName. Setting version to $initialReleaseVersion"
               tagVersion=$initialReleaseVersion
           fi
-          git config --global user.email "pipeline@trapa_app.com"
-          git config --global user.name "${{ github.actor }}"
-          git tag -a $tagVersion -m "Version $tagVersion" ${{ github.sha }}
-          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
-          git push origin $tagVersion
+
+          if [ $(git tag -l "$tagVersion") ]; then
+              echo "Tag $tagVersion already exists"
+          else
+              echo "Tagging commit ${{ github.sha }} with version $tagVersion"
+              git config --global user.email "pipeline@trapa_app.com"
+              git config --global user.name "${{ github.actor }}"
+              git tag -a $tagVersion -m "Version $tagVersion" ${{ github.sha }}
+              git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+              git push origin $tagVersion
+          fi 
           echo "version=${tagVersion#v}" >> "$GITHUB_OUTPUT"
 
       - name: Google Auth
