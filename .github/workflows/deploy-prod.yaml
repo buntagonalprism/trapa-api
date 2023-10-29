@@ -68,7 +68,7 @@ jobs:
         run: |-
           version="${{ steps.tag.outputs.version }}"
           docker build -t "${{ env.REPO_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:$version" --build-arg="COMMIT=${{ github.sha }}" --build-arg="VERSION=$version" 
-          docker push "${{ env.REPO_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:$version
+          docker push "${{ env.REPO_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:$version"
 
 
       - name: Deploy to Cloud Run
