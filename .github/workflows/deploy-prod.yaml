@@ -1,0 +1,79 @@
+name: Production Deployment
+
+on:
+  push:
+    branches: 
+      - releases/v*
+
+env:
+  PROJECT_ID: trapa-prod 
+  REPO_LOCATION: australia-southeast1 
+  REPO_NAME: trapa-api
+  IMAGE_NAME: trapa-api
+  SERVICE_LOCATION: australia-southeast1 
+  SERVICE_NAME: trapa-api
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Determine Semantic Version
+        id: version
+        uses: paulhatch/semantic-version@v5.3.0
+
+      - name: Tag Commit with Version
+        id: tag
+        run: |
+          branchName="${{ github.ref }}"
+          initialReleaseVersion=v${branchName#refs/heads/release/v}.0
+          if [ $(git tag -l "$initialReleaseVersion") ]; then
+              echo "Tagging commit with version ${{ steps.version.outputs.version_tag }}"
+              tagVersion=${{ steps.version.outputs.version_tag }}    
+          else
+              echo "First commit on release branch $branchName. Tagging commit with version $initialReleaseVersion"
+              tagVersion=$initialReleaseVersion
+          fi
+          git config --global user.email "pipeline@trapa_app.com"
+          git config --global user.name "${{ github.actor }}"
+          git tag -a $tagVersion -m "Version $tagVersion" ${{ github.sha }}
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+          git push origin $tagVersion
+          echo "version=${tagVersion$v}" >> "$GITHUB_OUTPUT"
+
+      - name: Google Auth
+        id: auth
+        uses: 'google-github-actions/auth@v1'
+        with:
+          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+          token_format: 'access_token'
+
+      - name: Docker Auth
+        id: docker-auth
+        uses: 'docker/login-action@v1'
+        with:
+          username: 'oauth2accesstoken'
+          password: '${{ steps.auth.outputs.access_token }}'
+          registry: '${{ env.REPO_LOCATION }}-docker.pkg.dev'
+
+      - name: Build and Push Container
+        run: |-
+          $version="${{ steps.tag.outputs.version }}"
+          docker build -t "${{ env.REPO_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:$version" --build-arg="COMMIT=${{ github.sha }}" --build-arg="VERSION=$version" 
+          docker push "${{ env.REPO_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:$version
+
+
+      - name: Deploy to Cloud Run
+        id: deploy
+        uses: google-github-actions/deploy-cloudrun@v1
+        with:
+          service: ${{ env.SERVICE_NAME }}
+          region: ${{ env.SERVICE_LOCATION }}
+          image: ${{ env.REPO_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.version }}
+
+      - name: Show Output
+        run: echo ${{ steps.deploy.outputs.url }}

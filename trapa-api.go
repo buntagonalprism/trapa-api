@@ -51,6 +51,10 @@ func init() {
 	}
 }
 
+// Build version, injected during CI pipeline build
+var version = "0.0.1"
+var commit = "unknown"
+
 func main() {
 
 	defer fsClient.Close()
@@ -60,6 +64,8 @@ func main() {
 	router.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "pong",
+			"version": version,
+			"commit":  commit,
 		})
 	})
 
