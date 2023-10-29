@@ -3,7 +3,7 @@ name: Production Deployment
 on:
   push:
     branches: 
-      - releases/v*
+      - release/v*
 
 env:
   PROJECT_ID: trapa-prod 
