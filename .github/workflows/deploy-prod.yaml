@@ -5,6 +5,10 @@ on:
     branches: 
       - release/v*
 
+# Required to apply the release tag number to the commit
+permissions:
+  contents: write
+
 env:
   PROJECT_ID: trapa-prod 
   REPO_LOCATION: australia-southeast1 
